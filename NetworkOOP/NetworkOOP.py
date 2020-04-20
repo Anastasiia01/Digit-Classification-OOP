@@ -2,7 +2,9 @@ import sys
 import os
 import cv2
 from Layer import Layer
+from NN import NN
 from ActivationType import ActivationType
+from GradientType import GradientType
 import numpy as np
 
 def main():
@@ -27,10 +29,9 @@ def main():
     trainX = train.reshape(train.shape[0],train.shape[1]*train.shape[2],1)
     testX = test.reshape(test.shape[0],test.shape[1]*test.shape[2],1)
 
-    layer=Layer(100,2,ActivationType.SIGMOID,1.0,False)
-    X=np.ones((3,2))
-    layer.Evaluate(X)
-    print("a: ", layer.a.shape)
+    network=NN(trainX,trainY,[50,10],ActivationType.SIGMOID, ActivationType.SIGMOID,GradientType.STOCHASTIC)
+
+    
 
 
 

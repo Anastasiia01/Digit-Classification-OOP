@@ -24,10 +24,16 @@
     <Compile Include="ActivationType.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="GradientType.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Layer.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="NetworkOOP.py" />
+    <Compile Include="NN.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
