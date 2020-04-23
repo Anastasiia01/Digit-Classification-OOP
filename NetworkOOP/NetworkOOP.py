@@ -33,7 +33,8 @@ def main():
 
     network=NN(trainX,trainY,[50,10],ActivationType.SIGMOID, ActivationType.SIGMOID)
     network.Train(GradientType.STOCHASTIC)
-    
+    accur=network.GetAccuracy(testX,testY)
+    print(accur)
 
 
 

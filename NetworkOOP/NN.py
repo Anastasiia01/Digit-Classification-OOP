@@ -26,7 +26,7 @@ class NN(object):
             self.listOfLayers[i].Evaluate(self.listOfLayers[i-1].a)
         return self.listOfLayers[len(self.listOfLayers)-1].a
 
-    def Train(self, gradientType, epochsNum=100, alpha=0.1, regLambda=0.1, batchNorm=False, batchSize=50):
+    def Train(self, gradientType, epochsNum=100, alpha=0.01, regLambda=0.01, batchNorm=False, batchSize=50):
         samplesNum=self.X.shape[0]
         for j in range(epochsNum):
             self.X,self.Y=shuffle(self.X,self.Y)
@@ -75,8 +75,17 @@ class NN(object):
             level.B=level.B-alpha*(level.gradB/batchSize)
             level.clearGradWB()
 
-    def GetAccuracy(self):
-        accuracy=0
+    def GetAccuracy(self, testX, testY):
+        rightCount=0
+        testsNum=testX.shape[0]
+        for i in range(testsNum):
+            yi=testY[i]
+            #forward pass:
+            a2=self.Evaluate(testX[i])
+            maxIdx=np.argmax(a2)
+            if(yi[maxIdx]==1):
+                rightCount+=1
+        accuracy=(rightCount/testsNum)*100
         return accuracy
 
     def Classify(self):
