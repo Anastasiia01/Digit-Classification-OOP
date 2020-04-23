@@ -26,11 +26,13 @@ def main():
         testY[i,y] = 1.0
         test[i] = cv2.imread('C:/Users/anast/Documents/Deep Learning/Data/Test10000/{0}'.format(filename),0)/255.0
         i = i + 1
-    trainX = train.reshape(train.shape[0],train.shape[1]*train.shape[2],1)
-    testX = test.reshape(test.shape[0],test.shape[1]*test.shape[2],1)
+    trainX = train.reshape(train.shape[0],train.shape[1]*train.shape[2])
+    testX = test.reshape(test.shape[0],test.shape[1]*test.shape[2])
+    trainY = trainY.reshape(trainY.shape[0],trainY.shape[1])
+    testY = testY.reshape(testY.shape[0],testY.shape[1])
 
-    network=NN(trainX,trainY,[50,10],ActivationType.SIGMOID, ActivationType.SIGMOID,GradientType.STOCHASTIC)
-
+    network=NN(trainX,trainY,[50,10],ActivationType.SIGMOID, ActivationType.SIGMOID)
+    network.Train(GradientType.STOCHASTIC)
     
 
 

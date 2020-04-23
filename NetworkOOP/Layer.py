@@ -23,11 +23,10 @@ class Layer(object):
         self.gradW=np.zeros(self.W.shape)
         self.gradB=np.zeros(self.B.shape) #same as delta
         self.gradAF=None;#gradient of activation function
- 
-       
+        
     
     def Evaluate(self,input):
-  
+        #forward prop
         self.sum=input@self.W.T+self.B #sum is (numSamples x numNeurons)        
         if(self.activationFunction==ActivationType.SIGMOID):
             self.a=self.sigmoid(self.sum)
@@ -46,6 +45,10 @@ class Layer(object):
             self.mask = np.random.binomial(1, self.dropOut, size=self.a.shape)/self.dropOut
             self.a=self.mask*self.a
             self.gradAF=self.mask*self.gradAF
+        
+    def clearGradWB(self):
+        self.gradW=np.zeros(self.W.shape)
+        self.gradB=np.zeros(self.B.shape)
 
     def sigmoid(self,x):
         return 1/(1+np.exp(-x))
