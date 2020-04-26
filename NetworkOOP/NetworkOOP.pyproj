@@ -24,6 +24,9 @@
     <Compile Include="ActivationType.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="BatchNormMode.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="GradientType.py">
       <SubType>Code</SubType>
     </Compile>

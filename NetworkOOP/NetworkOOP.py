@@ -31,12 +31,10 @@ def main():
     trainY = trainY.reshape(trainY.shape[0],trainY.shape[1])
     testY = testY.reshape(testY.shape[0],testY.shape[1])
 
-    network=NN(trainX,trainY,[50,10],ActivationType.SIGMOID, ActivationType.SIGMOID)
-    network.Train(GradientType.STOCHASTIC)
+    network=NN(trainX,trainY,[50,10],ActivationType.RELU,ActivationType.SOFTMAX)
+    network.Train(GradientType.MINIBATCH,batchNorm=False)
     accur=network.GetAccuracy(testX,testY)
     print(accur)
-
-
 
 
 if __name__ == "__main__":
