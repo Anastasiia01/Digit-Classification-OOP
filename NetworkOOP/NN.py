@@ -29,7 +29,7 @@ class NN(object):
         self.listOfLayers[len(self.listOfLayers)-1].Evaluate(self.listOfLayers[len(self.listOfLayers)-2].a,batchNorm=False)
         return self.listOfLayers[len(self.listOfLayers)-1].a
     
-    def Train(self, gradientType, epochsNum=50, alpha=0.1, regLambda=0.01 , batchNorm=False, Size=40):
+    def Train(self, gradientType, epochsNum=50, alpha=0.1, regLambda=0.01 , batchNorm=False, Size=50):
         samplesNum=self.X.shape[0]
         epsilon=1E-6
         if(gradientType==GradientType.STOCHASTIC):
@@ -46,7 +46,6 @@ class NN(object):
                 xBatch=self.X[i:i+batchSize]
                 yBatch=self.Y[i:i+batchSize]
                 actualOut=self.Evaluate(xBatch,batchNorm,batchMode=BatchNormMode.TRAIN)
-                #print(actualOut)
                 if(self.lastLayerAF==ActivationType.SOFTMAX):
                     loss+=-(yBatch*np.log(actualOut+0.001)).sum()
                 else:
@@ -62,8 +61,8 @@ class NN(object):
                     else:#regular layer
                         self.listOfLayers[levelNum].delta=self.listOfLayers[levelNum+1].delta@(self.listOfLayers[levelNum+1].W)*self.listOfLayers[levelNum].gradAF 
                         if(batchNorm==True):
-                            self.listOfLayers[levelNum].GradBeta=self.listOfLayers[levelNum].delta.sum(axis=0)
-                            self.listOfLayers[levelNum].GradGamma=(self.listOfLayers[levelNum].delta*self.listOfLayers[levelNum].sHat).sum(axis=0)
+                            self.listOfLayers[levelNum].gradBeta=self.listOfLayers[levelNum].delta.mean(axis=0)
+                            self.listOfLayers[levelNum].gradGamma=(self.listOfLayers[levelNum].delta*self.listOfLayers[levelNum].sHat).mean(axis=0)
                             self.listOfLayers[levelNum].deltaBn=(self.listOfLayers[levelNum].delta*self.listOfLayers[levelNum].gamma)/(batchSize*((self.listOfLayers[levelNum].sigma2+epsilon)**0.5))*(batchSize-1-(self.listOfLayers[levelNum].sHat)**2)
                             #self.listOfLayers[levelNum].deltaBn=(self.listOfLayers[levelNum].delta * self.listOfLayers[levelNum].gamma)/(batchSize*np.sqrt(self.listOfLayers[levelNum].sigma2 +self.listOfLayers[levelNum].epsilon )) * (batchSize - 1 - (self.listOfLayers[levelNum].sHat * self.listOfLayers[levelNum].sHat))
                     if(levelNum>0):
@@ -71,23 +70,23 @@ class NN(object):
                     else:#level #zero
                         prevOut=xBatch 
                     if(batchNorm==True and self.listOfLayers[levelNum].isLastLayer==False):
-                        self.listOfLayers[levelNum].gradB+=self.listOfLayers[levelNum].deltaBn.sum(axis=0)
-                        self.listOfLayers[levelNum].gradW+=self.listOfLayers[levelNum].deltaBn.T@prevOut
-                    else:
-                        self.listOfLayers[levelNum].gradB+=self.listOfLayers[levelNum].delta.sum(axis=0)
-                        self.listOfLayers[levelNum].gradW+=self.listOfLayers[levelNum].delta.T@prevOut                        
+                    #if(batchNorm==True):
+                        self.listOfLayers[levelNum].gradB=self.listOfLayers[levelNum].deltaBn.sum(axis=0)
+                        self.listOfLayers[levelNum].gradW=self.listOfLayers[levelNum].deltaBn.T@prevOut
+                    else: 
+                        self.listOfLayers[levelNum].gradB=self.listOfLayers[levelNum].delta.sum(axis=0)
+                        self.listOfLayers[levelNum].gradW=self.listOfLayers[levelNum].delta.T@prevOut                        
                     levelNum-=1  
                 self.UpdateGradsWB(alpha,regLambda,batchSize,batchNorm)
             print("epoch = ", j, "loss = ", loss)
 
-    def UpdateGradsWB(self, alpha,regLambda,batchSize,batchNorm=False):
+    def UpdateGradsWB(self, alpha,regLambda,batchSize,batchNorm):
         for level in self.listOfLayers:
             level.W=level.W-alpha*(level.gradW/batchSize)-alpha*regLambda*level.W
             level.B=level.B-alpha*(level.gradB/batchSize)
             if(batchNorm==True):
-                level.beta=level.beta-alpha*(level.gradBeta/batchSize)
-                level.gamma=level.gamma-alpha*(level.gradGamma/batchSize)
-            level.clearGrads()
+                level.beta=level.beta-alpha*(level.gradBeta)
+                level.gamma=level.gamma-alpha*(level.gradGamma)
 
     def GetAccuracy(self, testX, testY, batchNorm=False):
         rightCount=0

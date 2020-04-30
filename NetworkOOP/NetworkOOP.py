@@ -31,9 +31,10 @@ def main():
     trainY = trainY.reshape(trainY.shape[0],trainY.shape[1])
     testY = testY.reshape(testY.shape[0],testY.shape[1])
 
+    doBatchNorm=False
     network=NN(trainX,trainY,[50,10],ActivationType.RELU,ActivationType.SOFTMAX)
-    network.Train(GradientType.MINIBATCH,batchNorm=False)
-    accur=network.GetAccuracy(testX,testY)
+    network.Train(GradientType.MINIBATCH,batchNorm=doBatchNorm)
+    accur=network.GetAccuracy(testX,testY,batchNorm=doBatchNorm)
     print(accur)
 
 
