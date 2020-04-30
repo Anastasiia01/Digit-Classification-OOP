@@ -39,6 +39,11 @@ class Layer(object):
         self.gradBeta=np.zeros(self.numNeurons)
         self.deltaBn=None#deltabn is (numSamples x numNeurons)  #grad of S
 
+        #Adam learning rate optimization parameters
+        self.mW=0
+        self.vW=0
+        self.mB=0
+        self.vB=0
     
     def Evaluate(self,input, batchNorm=False, batchMode=BatchNormMode.TRAIN):
         #forward prop
@@ -67,8 +72,7 @@ class Layer(object):
             self.gradAF=(1-self.a*self.a)
         elif(self.activationFunction==ActivationType.RELU):
             self.a=self.Relu(sum)
-            #self.derivAF = 1.0 * (self.a > 0)
-            epsilon=1.0e-6
+            epsilon=1E-6
             self.gradAF = 1. * (self.a > epsilon)
             self.gradAF[self.gradAF == 0] = epsilon
             #self.gradAF=1.0*(self.a>0)
@@ -103,7 +107,6 @@ class Layer(object):
             ex[i] = ex[i]/denom
         return ex
 
-        #return np.exp(x)/np.sum(np.exp(x))
 
 
     

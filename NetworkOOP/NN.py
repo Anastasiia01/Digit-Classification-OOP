@@ -1,9 +1,11 @@
 from ActivationType import ActivationType
 from GradientType import GradientType
+from OptimizerType import OptimizerType
 from Layer import Layer
 import numpy as np
 from sklearn.utils import shuffle
 from BatchNormMode import BatchNormMode
+
 
 class NN(object):
     def __init__(self, X,Y,listNeuronsInLayers, activationFunction, lastActivationFunction, dropOut=1.0):
@@ -29,9 +31,10 @@ class NN(object):
         self.listOfLayers[len(self.listOfLayers)-1].Evaluate(self.listOfLayers[len(self.listOfLayers)-2].a,batchNorm=False)
         return self.listOfLayers[len(self.listOfLayers)-1].a
     
-    def Train(self, gradientType, epochsNum=50, alpha=0.1, regLambda=0.01 , batchNorm=False, Size=50):
+    def Train(self, gradientType, epochsNum=50, alpha=0.1, regLambda=0.01 , batchNorm=False, optimizer=OptimizerType.NONE,Size=50):
         samplesNum=self.X.shape[0]
         epsilon=1E-6
+        iteration=0
         if(gradientType==GradientType.STOCHASTIC):
             batchSize=1
         elif(gradientType==GradientType.MINIBATCH):
@@ -70,20 +73,40 @@ class NN(object):
                     else:#level #zero
                         prevOut=xBatch 
                     if(batchNorm==True and self.listOfLayers[levelNum].isLastLayer==False):
-                    #if(batchNorm==True):
                         self.listOfLayers[levelNum].gradB=self.listOfLayers[levelNum].deltaBn.sum(axis=0)
                         self.listOfLayers[levelNum].gradW=self.listOfLayers[levelNum].deltaBn.T@prevOut
                     else: 
                         self.listOfLayers[levelNum].gradB=self.listOfLayers[levelNum].delta.sum(axis=0)
                         self.listOfLayers[levelNum].gradW=self.listOfLayers[levelNum].delta.T@prevOut                        
                     levelNum-=1  
-                self.UpdateGradsWB(alpha,regLambda,batchSize,batchNorm)
+                iteration+=1
+                self.UpdateGradsWB(alpha,regLambda,batchSize,batchNorm,optimizer,iteration)
             print("epoch = ", j, "loss = ", loss)
 
-    def UpdateGradsWB(self, alpha,regLambda,batchSize,batchNorm):
+    def UpdateGradsWB(self,alpha,regLambda,batchSize,batchNorm,optimizer,iteration=1):   
+        t=iteration
+        epsilon=1E-8
+        beta1=0.9
+        beta2=0.999
         for level in self.listOfLayers:
-            level.W=level.W-alpha*(level.gradW/batchSize)-alpha*regLambda*level.W
-            level.B=level.B-alpha*(level.gradB/batchSize)
+            if(optimizer==OptimizerType.ADAM):
+                print("here")
+                level.mW=beta1*level.mW+(1-beta1)*level.gradW
+                level.vW=beta2*level.vW+(1-beta2)*(level.gradW)**2
+                level.mB=beta1*level.mB+(1-beta1)*level.gradB
+                level.vB=beta2*level.vB+(1-beta2)*(level.gradB)**2
+
+                mWHat=level.mW/(1-(beta1**t))
+                vWHat=level.vW/(1-(beta2**t))
+                mBHat=level.mB/(1-(beta1**t))
+                vBHat=level.vB/(1-(beta2**t))
+
+                level.W=level.W-alpha/batchSize/((vWHat**0.5)+epsilon)*(mWHat)
+                level.B=level.B-alpha/batchSize/((vBHat**0.5)+epsilon)*(mBHat)
+
+            else:#optimizer==OptimizerType.NONE
+                level.W=level.W-alpha/batchSize*(level.gradW)-alpha*regLambda*level.W
+                level.B=level.B-alpha/batchSize*(level.gradB)
             if(batchNorm==True):
                 level.beta=level.beta-alpha*(level.gradBeta)
                 level.gamma=level.gamma-alpha*(level.gradGamma)

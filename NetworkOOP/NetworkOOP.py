@@ -5,6 +5,7 @@ from Layer import Layer
 from NN import NN
 from ActivationType import ActivationType
 from GradientType import GradientType
+from OptimizerType import OptimizerType
 import numpy as np
 
 def main():
@@ -33,7 +34,8 @@ def main():
 
     doBatchNorm=False
     network=NN(trainX,trainY,[50,10],ActivationType.RELU,ActivationType.SOFTMAX)
-    network.Train(GradientType.MINIBATCH,batchNorm=doBatchNorm)
+    #network.Train(GradientType.MINIBATCH,epochsNum=50,alpha=0.1,batchNorm=doBatchNorm,optimizer=OptimizerType.NONE)
+    network.Train(GradientType.MINIBATCH,epochsNum=10,alpha=0.01, batchNorm=doBatchNorm,optimizer=OptimizerType.ADAM,Size=5)
     accur=network.GetAccuracy(testX,testY,batchNorm=doBatchNorm)
     print(accur)
 
